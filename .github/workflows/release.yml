@@ -1,0 +1,35 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: read
+
+jobs:
+  release:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-go@v7
+        with:
+          go-version-file: go.mod
+          cache: false
+
+      - name: Run tests
+        run: go test ./...
+
+      - name: Check common Go mistakes
+        run: go vet ./...
+
+      - name: Build macOS binaries
+        env:
+          GOOS: darwin
+          CGO_ENABLED: "0"
+        run: |
+          mkdir -p dist/arm64 dist/amd64
+          GOARCH=arm64 go build -trimpath -o dist/arm64/portman .
+          GOARCH=amd64 go build -trimpath -o dist/amd64/portman .
