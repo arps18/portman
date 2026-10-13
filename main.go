@@ -19,5 +19,10 @@ func main() {
 		return
 	}
 
+	if port < 1 || port > 65535 {
+		fmt.Println("Port number out of bound")
+		return
+	}
+
 	fmt.Println(port)
 }
