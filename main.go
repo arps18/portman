@@ -9,18 +9,13 @@ import (
 
 func main() {
 	if len(os.Args) != 2 {
-		fmt.Println("Usage: portman <port>")
+		fmt.Fprintln(os.Stderr, "Usage: portman <port>")
 		os.Exit(1)
 	}
+	port, err := parsePort(os.Args[1])
 
-	port, err := strconv.Atoi(os.Args[1])
 	if err != nil {
-		fmt.Println("Incorrect port number")
-		os.Exit(1)
-	}
-
-	if port < 1 || port > 65535 {
-		fmt.Println("Port number out of bound")
+		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
 
@@ -33,16 +28,29 @@ func main() {
 			if exitErr.ExitCode() == 1 && len(exitErr.Stderr) == 0 {
 				fmt.Println("No TCP listeners found on port", port)
 			} else {
-				fmt.Println(err)
-				fmt.Print(string(exitErr.Stderr))
+				fmt.Fprintln(os.Stderr, err)
+				fmt.Fprint(os.Stderr, string(exitErr.Stderr))
 				os.Exit(1)
 			}
 		} else {
-			fmt.Println(err)
+			fmt.Fprintln(os.Stderr, err)
 			os.Exit(1)
 		}
 		return
 	}
 
 	fmt.Print(string(output))
+
+}
+
+func parsePort(input string) (int, error) {
+	port, err := strconv.Atoi(input)
+	if err != nil {
+		return 0, err
+	}
+
+	if port < 1 || port > 65535 {
+		return 0, fmt.Errorf("port must be between 1 and 65535")
+	}
+	return port, nil
 }
