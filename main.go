@@ -10,19 +10,18 @@ import (
 func main() {
 	if len(os.Args) != 2 {
 		fmt.Println("Usage: portman <port>")
-		return
+		os.Exit(1)
 	}
 
 	port, err := strconv.Atoi(os.Args[1])
-	// fmt.Println(os.Args[1])
 	if err != nil {
 		fmt.Println("Incorrect port number")
-		return
+		os.Exit(1)
 	}
 
 	if port < 1 || port > 65535 {
 		fmt.Println("Port number out of bound")
-		return
+		os.Exit(1)
 	}
 
 	cmd := exec.Command("lsof", "-nP", "-iTCP:"+strconv.Itoa(port), "-sTCP:LISTEN")
@@ -36,9 +35,11 @@ func main() {
 			} else {
 				fmt.Println(err)
 				fmt.Print(string(exitErr.Stderr))
+				os.Exit(1)
 			}
 		} else {
 			fmt.Println(err)
+			os.Exit(1)
 		}
 		return
 	}
