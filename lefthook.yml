@@ -1,0 +1,11 @@
+pre-commit:
+  commands:
+    format:
+      glob: "*.go"
+      run: gofmt -w {staged_files}
+      stage_fixed: true
+
+pre-push:
+  commands:
+    tests:
+      run: go test ./...
