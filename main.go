@@ -28,12 +28,13 @@ func main() {
 	cmd := exec.Command("lsof", "-nP", "-iTCP:"+strconv.Itoa(port), "-sTCP:LISTEN")
 	output, err := cmd.Output()
 
-	exitErr, ok := err.(*exec.ExitError)
 	if err != nil {
-		if ok == true {
+		exitErr, ok := err.(*exec.ExitError)
+		if ok {
 			fmt.Println(exitErr.ExitCode())
+		} else {
+			fmt.Println(err)
 		}
-		fmt.Println(err)
 		return
 	}
 
