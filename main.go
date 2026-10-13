@@ -31,7 +31,12 @@ func main() {
 	if err != nil {
 		exitErr, ok := err.(*exec.ExitError)
 		if ok {
-			fmt.Println(exitErr.ExitCode())
+			if exitErr.ExitCode() == 1 && len(exitErr.Stderr) == 0 {
+				fmt.Println("No TCP listeners found on port", port)
+			} else {
+				fmt.Println(err)
+				fmt.Print(string(exitErr.Stderr))
+			}
 		} else {
 			fmt.Println(err)
 		}
