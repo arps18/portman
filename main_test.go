@@ -3,25 +3,35 @@ package main
 import "testing"
 
 func TestParsePort(t *testing.T) {
-	port, err := parsePort("3000")
-
-	if err != nil {
-		t.Fatalf("expected no error, got %v", err)
+	tests := []struct {
+		name     string
+		input    string
+		wantPort int
+		wantErr  bool
+	}{
+		{name: "typical port", input: "3000", wantPort: 3000},
+		{name: "minimum port", input: "1", wantPort: 1},
+		{name: "maximum port", input: "65535", wantPort: 65535},
+		{name: "zero", input: "0", wantErr: true},
+		{name: "negative", input: "-1", wantErr: true},
+		{name: "above maximum", input: "65536", wantErr: true},
+		{name: "invalid text", input: "hello", wantErr: true},
+		{name: "empty input", input: "", wantErr: true},
 	}
 
-	if port != 3000 {
-		t.Fatalf("expected port 3000, got %d", port)
-	}
-}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			port, err := parsePort(tt.input)
 
-func TestParsePortInvalidText(t *testing.T) {
-	port, err := parsePort("hello")
+			if (err != nil) != tt.wantErr {
+				t.Fatalf("parsePort(%q): error = %v, wantErr = %t",
+					tt.input, err, tt.wantErr)
+			}
 
-	if err == nil {
-		t.Fatal("expected an error for invalid text")
-	}
-
-	if port != 0 {
-		t.Fatalf("expected port 0 on failure, got %d", port)
+			if port != tt.wantPort {
+				t.Fatalf("parsePort(%q): port = %d, want %d",
+					tt.input, port, tt.wantPort)
+			}
+		})
 	}
 }
