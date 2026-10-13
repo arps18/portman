@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"os"
+	"os/exec"
 	"strconv"
 )
 
@@ -24,5 +25,13 @@ func main() {
 		return
 	}
 
-	fmt.Println(port)
+	cmd := exec.Command("lsof", "-nP", "-iTCP:"+strconv.Itoa(port), "-sTCP:LISTEN")
+	output, err := cmd.Output()
+
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	fmt.Print(string(output))
 }
