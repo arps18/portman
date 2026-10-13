@@ -33,3 +33,11 @@ jobs:
           mkdir -p dist/arm64 dist/amd64
           GOARCH=arm64 go build -trimpath -o dist/arm64/portman .
           GOARCH=amd64 go build -trimpath -o dist/amd64/portman .
+      - name: Package binaries
+        run: |
+          cp LICENSE dist/arm64/LICENSE
+          cp LICENSE dist/amd64/LICENSE
+          tar -czf dist/portman_darwin_arm64.tar.gz -C dist/arm64 portman LICENSE
+          tar -czf dist/portman_darwin_amd64.tar.gz -C dist/amd64 portman LICENSE
+          cd dist
+          shasum -a 256 portman_darwin_*.tar.gz > checksums.txt
