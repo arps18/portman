@@ -13,3 +13,15 @@ func TestParsePort(t *testing.T) {
 		t.Fatalf("expected port 3000, got %d", port)
 	}
 }
+
+func TestParsePortInvalidText(t *testing.T) {
+	port, err := parsePort("hello")
+
+	if err == nil {
+		t.Fatal("expected an error for invalid text")
+	}
+
+	if port != 0 {
+		t.Fatalf("expected port 0 on failure, got %d", port)
+	}
+}
