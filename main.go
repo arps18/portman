@@ -18,20 +18,14 @@ func main() {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
-
-	cmd := exec.Command("lsof", "-nP", "-iTCP:"+strconv.Itoa(port), "-sTCP:LISTEN")
-	output, err := cmd.Output()
+	output, err := inspectPort(port)
 
 	if err != nil {
 		exitErr, ok := err.(*exec.ExitError)
 		if ok {
-			if exitErr.ExitCode() == 1 && len(exitErr.Stderr) == 0 {
-				fmt.Println("No TCP listeners found on port", port)
-			} else {
-				fmt.Fprintln(os.Stderr, err)
-				fmt.Fprint(os.Stderr, string(exitErr.Stderr))
-				os.Exit(1)
-			}
+			fmt.Fprintln(os.Stderr, err)
+			fmt.Fprint(os.Stderr, string(exitErr.Stderr))
+			os.Exit(1)
 		} else {
 			fmt.Fprintln(os.Stderr, err)
 			os.Exit(1)
@@ -39,7 +33,11 @@ func main() {
 		return
 	}
 
-	fmt.Print(string(output))
+	if output == "" {
+		fmt.Println("No TCP listeners found on port", port)
+		return
+	}
+	fmt.Print(output)
 
 }
 
@@ -53,4 +51,18 @@ func parsePort(input string) (int, error) {
 		return 0, fmt.Errorf("port must be between 1 and 65535")
 	}
 	return port, nil
+}
+
+func inspectPort(port int) (string, error) {
+	cmd := exec.Command("lsof", "-nP", "-iTCP:"+strconv.Itoa(port), "-sTCP:LISTEN")
+	output, err := cmd.Output()
+	if err != nil {
+		exitErr, ok := err.(*exec.ExitError)
+		if ok && exitErr.ExitCode() == 1 && len(exitErr.Stderr) == 0 {
+			return "", nil
+		}
+		return "", err
+	}
+
+	return string(output), nil
 }
