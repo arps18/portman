@@ -1,0 +1,107 @@
+name: Update Homebrew
+
+on:
+  workflow_call:
+    inputs:
+      tag:
+        description: Release tag to package
+        required: true
+        type: string
+    secrets:
+      HOMEBREW_TAP_TOKEN:
+        required: true
+
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Existing release tag, such as v0.2.0"
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  update-tap:
+    runs-on: macos-latest
+    steps:
+      - name: Check out Portman
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - name: Check out Homebrew tap
+        uses: actions/checkout@v7
+        with:
+          repository: arps18/homebrew-tap
+          ref: main
+          token: ${{ secrets.HOMEBREW_TAP_TOKEN }}
+          path: homebrew-tap
+          persist-credentials: false
+
+      - name: Check release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ inputs.tag }}
+        run: |
+          gh release view "$RELEASE_TAG" \
+            --repo arps18/portman \
+            --json tagName,isDraft,isPrerelease \
+            --jq 'if .isDraft or .isPrerelease then error("Use a published stable release") else .tagName end'
+
+      - name: Download and verify release files
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ inputs.tag }}
+        run: |
+          gh release download "$RELEASE_TAG" \
+            --repo arps18/portman \
+            --pattern "portman_darwin_arm64.tar.gz" \
+            --pattern "portman_darwin_amd64.tar.gz" \
+            --pattern "checksums.txt" \
+            --dir release-assets
+
+          cd release-assets
+          shasum -a 256 -c checksums.txt
+
+      - name: Prevent version downgrades
+        env:
+          RELEASE_TAG: ${{ inputs.tag }}
+        run: |
+          ruby -rrubygems -e '
+            formula = File.read("homebrew-tap/Formula/portman.rb")
+            current = formula[/^\s*version "([^"]+)"/, 1]
+            abort "Cannot find the current formula version" unless current
+
+            requested = ENV.fetch("RELEASE_TAG").delete_prefix("v")
+
+            if Gem::Version.new(requested) < Gem::Version.new(current)
+              abort "Requested release is older than the current formula"
+            end
+          '
+
+      - name: Render Homebrew formula
+        env:
+          RELEASE_TAG: ${{ inputs.tag }}
+        run: |
+          ruby scripts/render-homebrew.rb > "$RUNNER_TEMP/portman.rb"
+          ruby -c "$RUNNER_TEMP/portman.rb"
+          cp "$RUNNER_TEMP/portman.rb" homebrew-tap/Formula/portman.rb
+
+      - name: Open Homebrew update PR
+        uses: peter-evans/create-pull-request@v8
+        with:
+          token: ${{ secrets.HOMEBREW_TAP_TOKEN }}
+          path: homebrew-tap
+          add-paths: Formula/portman.rb
+          base: main
+          branch: update-portman-${{ inputs.tag }}
+          commit-message: "portman ${{ inputs.tag }}"
+          title: "Update Portman to ${{ inputs.tag }}"
+          body: |
+            Updates the Homebrew formula for Portman ${{ inputs.tag }}.
+
+            Includes the release version, archive URLs, verified checksums,
+            and version test.
+
+            Release: https://github.com/arps18/portman/releases/tag/${{ inputs.tag }}
