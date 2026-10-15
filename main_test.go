@@ -1,6 +1,9 @@
 package main
 
-import "testing"
+import (
+	"strings"
+	"testing"
+)
 
 func TestParsePort(t *testing.T) {
 	tests := []struct {
@@ -33,5 +36,23 @@ func TestParsePort(t *testing.T) {
 					tt.input, port, tt.wantPort)
 			}
 		})
+	}
+}
+
+func TestInspectPortMissingLsof(t *testing.T) {
+	t.Setenv("PATH", t.TempDir())
+
+	output, err := inspectPort(3000)
+
+	if err == nil {
+		t.Fatal("expected an error when lsof is unavailable")
+	}
+
+	if output != "" {
+		t.Fatalf("expected empty output, got %q", output)
+	}
+
+	if !strings.Contains(err.Error(), "lsof not found in PATH") {
+		t.Fatalf("expected missing-lsof message, got %v", err)
 	}
 }
