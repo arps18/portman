@@ -7,6 +7,8 @@ import (
 	"strconv"
 )
 
+var version = "dev"
+
 func main() {
 	if len(os.Args) != 2 {
 		fmt.Fprintln(os.Stderr, "Usage: portman <port>")
@@ -14,6 +16,10 @@ func main() {
 	}
 	if os.Args[1] == "--help" || os.Args[1] == "-h" {
 		printHelp()
+		return
+	}
+	if os.Args[1] == "--version" {
+		printVersion()
 		return
 	}
 	port, err := parsePort(os.Args[1])
@@ -80,8 +86,13 @@ Usage:
 
 Options:
   -h, --help  Show help
+ --version	  Show version   
 
 Example:
   portman 3000
 `)
+}
+
+func printVersion() {
+	fmt.Println(version)
 }
