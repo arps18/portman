@@ -27,12 +27,13 @@ jobs:
 
       - name: Build macOS binaries
         env:
+          RELEASE_TAG: ${{ github.ref_name }}
           GOOS: darwin
           CGO_ENABLED: "0"
         run: |
           mkdir -p dist/arm64 dist/amd64
-          GOARCH=arm64 go build -trimpath -o dist/arm64/portman .
-          GOARCH=amd64 go build -trimpath -o dist/amd64/portman .
+          GOARCH=arm64 go build -trimpath -ldflags="-X main.version=${RELEASE_TAG}" -o dist/arm64/portman .
+          GOARCH=amd64 go build -trimpath -ldflags="-X main.version=${RELEASE_TAG}" -o dist/amd64/portman .
 
       - name: Package binaries
         run: |
