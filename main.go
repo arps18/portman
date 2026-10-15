@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"os/exec"
@@ -67,6 +68,9 @@ func inspectPort(port int) (string, error) {
 	cmd := exec.Command("lsof", "-nP", "-iTCP:"+strconv.Itoa(port), "-sTCP:LISTEN")
 	output, err := cmd.Output()
 	if err != nil {
+		if errors.Is(err, exec.ErrNotFound) {
+			return "", errors.New("lsof not found in PATH: Portman requires lsof to inspect TCP listeners")
+		}
 		exitErr, ok := err.(*exec.ExitError)
 		if ok && exitErr.ExitCode() == 1 && len(exitErr.Stderr) == 0 {
 			return "", nil
