@@ -72,5 +72,16 @@ func inspectPort(port int) (string, error) {
 }
 
 func printHelp() {
-	fmt.Println("Help Function is called!")
+	fmt.Print(`Portman — inspect local TCP listeners
+
+Usage:
+  portman <port>
+  portman --help
+
+Options:
+  -h, --help  Show help
+
+Example:
+  portman 3000
+`)
 }
