@@ -56,3 +56,13 @@ jobs:
             --verify-tag \
             --title "Portman $RELEASE_TAG" \
             --generate-notes
+
+  update-homebrew:
+    needs: release
+    permissions:
+      contents: read
+    uses: ./.github/workflows/update-homebrew.yml
+    with:
+      tag: ${{ github.ref_name }}
+    secrets:
+      HOMEBREW_TAP_TOKEN: ${{ secrets.HOMEBREW_TAP_TOKEN }}

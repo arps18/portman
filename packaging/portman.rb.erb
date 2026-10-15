@@ -1,0 +1,28 @@
+class Portman < Formula
+  desc "Inspect processes listening on a local TCP port"
+  homepage "https://github.com/arps18/portman"
+  version "<%= version %>"
+  license "MIT"
+
+  depends_on :macos
+
+  on_arm do
+    url "https://github.com/arps18/portman/releases/download/<%= tag %>/portman_darwin_arm64.tar.gz"
+    sha256 "<%= arm64_sha %>"
+  end
+
+  on_intel do
+    url "https://github.com/arps18/portman/releases/download/<%= tag %>/portman_darwin_amd64.tar.gz"
+    sha256 "<%= amd64_sha %>"
+  end
+
+  def install
+    bin.install "portman"
+  end
+
+  test do
+    output = shell_output("#{bin}/portman 70000 2>&1", 1)
+    assert_match "port must be between 1 and 65535", output
+    assert_equal "<%= tag %>", shell_output("#{bin}/portman --version").strip
+  end
+end
