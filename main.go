@@ -12,6 +12,10 @@ func main() {
 		fmt.Fprintln(os.Stderr, "Usage: portman <port>")
 		os.Exit(1)
 	}
+	if os.Args[1] == "--help" || os.Args[1] == "-h" {
+		printHelp()
+		return
+	}
 	port, err := parsePort(os.Args[1])
 
 	if err != nil {
@@ -65,4 +69,8 @@ func inspectPort(port int) (string, error) {
 	}
 
 	return string(output), nil
+}
+
+func printHelp() {
+	fmt.Println("Help Function is called!")
 }
