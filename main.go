@@ -87,10 +87,11 @@ func printHelp() {
 Usage:
   portman <port>
   portman --help
+  portman --version
 
 Options:
   -h, --help  Show help
- --version	  Show version   
+  --version   Show version
 
 Example:
   portman 3000
