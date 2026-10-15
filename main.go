@@ -54,7 +54,7 @@ func main() {
 func parsePort(input string) (int, error) {
 	port, err := strconv.Atoi(input)
 	if err != nil {
-		return 0, err
+		return 0, fmt.Errorf("invalid port %q: expected a whole number between 1 and 65535", input)
 	}
 
 	if port < 1 || port > 65535 {
