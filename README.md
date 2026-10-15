@@ -22,6 +22,48 @@ brew install arps18/tap/portman
 
 ## Usage
 
+Inspect a TCP port:
+
+```sh
+portman 3000
+```
+
+Example output, with identifying details replaced:
+
+```text
+COMMAND   PID USER   FD   TYPE DEVICE SIZE/OFF NODE NAME
+Python  12345 dev     3u  IPv4 0x0000      0t0  TCP 127.0.0.1:3000 (LISTEN)
+```
+
+If no listeners are found:
+
+```text
+No TCP listeners found on port 3000
+```
+
+Show help:
+
+```sh
+portman --help
+```
+
+`-h` also works.
+
+Show the installed version:
+
+```sh
+portman --version
+```
+
+Ports must be between `1` and `65535`. Invalid input or an inspection failure exits with status `1`. A completed inspection exits with status `0`, including when no listeners are found.
+
+## v0.2.0 changes
+
+- Added `--help` and `-h`.
+- Added `--version`, with the release version embedded during builds.
+- Improved error messages for invalid port input.
+- Added a clear error when `lsof` cannot be found in `PATH`.
+
 ```sh
 portman 3000
 ```
