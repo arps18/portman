@@ -64,25 +64,6 @@ Ports must be between `1` and `65535`. Invalid input or an inspection failure ex
 - Improved error messages for invalid port input.
 - Added a clear error when `lsof` cannot be found in `PATH`.
 
-```sh
-portman 3000
-```
-
-Example output, with identifying details replaced:
-
-```text
-COMMAND   PID USER   FD   TYPE DEVICE SIZE/OFF NODE NAME
-Python  12345 dev     3u  IPv4 0x0000      0t0  TCP 127.0.0.1:3000 (LISTEN)
-```
-
-If no listeners are found:
-
-```text
-No TCP listeners found on port 3000
-```
-
-Ports must be between `1` and `65535`. Invalid input or an inspection failure exits with status `1`. A completed inspection exits with status `0`, including when no listeners are found.
-
 ## Use with AI coding agents
 
 Portman works as a standalone CLI. Coding agents with shell access can also run it when it's installed and available on their `PATH`. Add this instruction to `CLAUDE.md`, `AGENTS.md`, or your agent's project instructions:
